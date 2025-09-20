@@ -1,0 +1,188 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>OpenTrivialDB - Trivia Questions</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        .container {
+            background-color: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        h1 {
+            color: #333;
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        .question-card {
+            background-color: #f8f9fa;
+            border: 1px solid #dee2e6;
+            border-radius: 8px;
+            padding: 20px;
+            margin-bottom: 20px;
+        }
+        .question-text {
+            font-size: 18px;
+            font-weight: bold;
+            margin-bottom: 15px;
+            color: #495057;
+        }
+        .question-type {
+            background-color: #007bff;
+            color: white;
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 12px;
+            text-transform: uppercase;
+            display: inline-block;
+            margin-bottom: 10px;
+        }
+        .category {
+            background-color: #28a745;
+            color: white;
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 12px;
+            display: inline-block;
+            margin-left: 10px;
+        }
+        .options {
+            margin-top: 15px;
+        }
+        .option {
+            background-color: #e9ecef;
+            border: 1px solid #ced4da;
+            border-radius: 4px;
+            padding: 10px;
+            margin: 5px 0;
+            cursor: pointer;
+            transition: background-color 0.2s;
+        }
+        .option:hover {
+            background-color: #dee2e6;
+        }
+        .correct-answer {
+            color: #28a745;
+            font-weight: bold;
+            margin-top: 10px;
+        }
+        .controls {
+            text-align: center;
+            margin: 30px 0;
+        }
+        button {
+            background-color: #007bff;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+            margin: 0 10px;
+        }
+        button:hover {
+            background-color: #0056b3;
+        }
+        .loading {
+            text-align: center;
+            color: #666;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>OpenTrivialDB - Trivia Questions</h1>
+        
+        <div class="controls">
+            <button onclick="loadAllQuestions()">Show All Questions</button>
+            <button onclick="loadRandomQuestion()">Get Random Question</button>
+        </div>
+        
+        <div id="questions-container">
+            <div class="loading">Click a button above to load questions!</div>
+        </div>
+    </div>
+
+    <script>
+        async function loadAllQuestions() {
+            const container = document.getElementById('questions-container');
+            container.innerHTML = '<div class="loading">Loading questions...</div>';
+            
+            try {
+                const response = await fetch('/api/questions');
+                const questions = await response.json();
+                
+                container.innerHTML = '';
+                questions.forEach(question => {
+                    container.appendChild(createQuestionElement(question));
+                });
+            } catch (error) {
+                container.innerHTML = '<div class="loading">Error loading questions: ' + error.message + '</div>';
+            }
+        }
+        
+        async function loadRandomQuestion() {
+            const container = document.getElementById('questions-container');
+            container.innerHTML = '<div class="loading">Loading random question...</div>';
+            
+            try {
+                const response = await fetch('/api/questions/random');
+                const question = await response.json();
+                
+                container.innerHTML = '';
+                container.appendChild(createQuestionElement(question));
+            } catch (error) {
+                container.innerHTML = '<div class="loading">Error loading question: ' + error.message + '</div>';
+            }
+        }
+        
+        function createQuestionElement(question) {
+            const div = document.createElement('div');
+            div.className = 'question-card';
+            
+            let optionsHtml = '';
+            if (question.type === 'boolean') {
+                optionsHtml = `
+                    <div class="options">
+                        <div class="option">True</div>
+                        <div class="option">False</div>
+                    </div>
+                `;
+            } else if (question.type === 'multiple') {
+                const allAnswers = [question.correct_answer, ...question.incorrect_answers].sort(() => Math.random() - 0.5);
+                optionsHtml = `
+                    <div class="options">
+                        ${allAnswers.map(answer => `<div class="option">${answer}</div>`).join('')}
+                    </div>
+                `;
+            }
+            
+            div.innerHTML = `
+                <div>
+                    <span class="question-type">${question.type}</span>
+                    <span class="category">${question.category}</span>
+                </div>
+                <div class="question-text">${question.question}</div>
+                ${optionsHtml}
+                <div class="correct-answer">Correct Answer: ${question.correct_answer}</div>
+            `;
+            
+            return div;
+        }
+        
+        // Load all questions by default
+        window.onload = function() {
+            loadAllQuestions();
+        };
+    </script>
+</body>
+</html>
