@@ -1,0 +1,16 @@
+{
+  "name": "opentrivialdb",
+  "version": "1.0.0",
+  "description": "Open Trival Database API to ask questions in true or false order or multiple choice.",
+  "main": "index.js",
+  "scripts": {
+    "start": "node index.js",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "express": "^5.1.0"
+  }
+}
