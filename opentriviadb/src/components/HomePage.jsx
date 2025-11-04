@@ -24,6 +24,7 @@ function HomePage() {
 
   useEffect(() => {
     async function fetchQuestions() {
+      if (typeof window === 'undefined') return; // ✅ Avoid Netlify build crash
       setLoading(true);
       setError(null);
       try {
@@ -37,7 +38,7 @@ function HomePage() {
           localStorage.setItem('triviaQuestions', JSON.stringify(data.results));
         }
       } catch (err) {
-        setError('Failed to fetch questions');
+        setError('Failed to fetch questions',err);
       } finally {
         setLoading(false);
       }
